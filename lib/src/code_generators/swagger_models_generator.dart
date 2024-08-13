@@ -1498,7 +1498,7 @@ $copyWithMethod
 
   List<String> _getRequired(
       SwaggerSchema schema, Map<String, SwaggerSchema> schemas,
-      [int recursionCount = 5]) {
+      [int recursionCount = 10]) {
     final required = <String>{};
     if (recursionCount == 0) {
       return required.toList();
@@ -1653,61 +1653,31 @@ $allHashComponents;
 
     currentProperties.addAll(newModelMap?.properties ?? {});
 
-    final refs = allOf.where((element) => element.ref.isNotEmpty).toList();
+    final refs = allOf.where((element) => element.hasRef).toList();
+    extractPropertiesOfRefs(refs, allClasses, currentProperties);
+
+    return currentProperties;
+  }
+
+  void extractPropertiesOfRefs(
+      List<SwaggerSchema> refs,
+      Map<String, SwaggerSchema> allClasses,
+      Map<String, SwaggerSchema> currentProperties) {
     for (var allOf in refs) {
       final allOfSchema = allClasses[allOf.ref.getUnformattedRef()];
 
       if (allOfSchema != null) {
-        final properties = Map.from(allOfSchema.properties);
+        final properties =
+            Map<String, SwaggerSchema>.from(allOfSchema.properties);
         for (final allOf in allOfSchema.allOf) {
-          properties.addAll(allOf.properties);
+          currentProperties.addAll(allOf.properties);
         }
-      }
+        currentProperties.addAll(properties);
 
-      currentProperties.addAll(allOfSchema?.properties ?? {});
-    }
-
-    if (currentProperties.isEmpty) {
-      return {};
-    }
-
-    final allOfRef = allOf.firstWhereOrNull((m) => m.hasRef);
-
-    if (allOfRef != null) {
-      final refString = allOfRef.ref;
-      final schema = schemas[refString.getUnformattedRef()];
-
-      if (schema != null) {
-        if (schema.allOf.isNotEmpty) {
-          final refs =
-              allOf.where((element) => element.ref.isNotEmpty).toList();
-
-          for (var allOf in refs) {
-            final allOfSchema = allClasses[allOf.ref.getUnformattedRef()];
-
-            if (allOfSchema != null) {
-              currentProperties.addAll(Map.from(allOfSchema.properties));
-              for (final allOf in allOfSchema.allOf) {
-                currentProperties.addAll(allOf.properties);
-
-                if (allOf.ref.isNotEmpty) {
-                  final oneMoreModel =
-                      allClasses[allOf.ref.getUnformattedRef()];
-                  currentProperties.addAll(oneMoreModel?.properties ?? {});
-                }
-              }
-            }
-
-            currentProperties.addAll(allOfSchema?.properties ?? {});
-          }
-        }
-        final moreProperties = schema.properties;
-
-        currentProperties.addAll(moreProperties);
+        extractPropertiesOfRefs(
+            allOfSchema.allOf, allClasses, currentProperties);
       }
     }
-
-    return currentProperties;
   }
 
   Map<String, SwaggerSchema> getRequestBodiesFromRequests(SwaggerRoot root) {
