@@ -145,12 +145,12 @@ String ${name.camelCase}ExplodedListToJson(
 }
 
 
-List<$type> ${name.camelCase}ListToJson(
+List<$type>? ${name.camelCase}ListToJson(
     List<enums.$name>? ${name.camelCase}) {
 
   if(${name.camelCase} == null)
   {
-    return [];
+    return null;
   }
 
   return ${name.camelCase}
