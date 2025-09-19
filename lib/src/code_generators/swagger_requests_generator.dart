@@ -574,7 +574,7 @@ class SwaggerRequestsGenerator extends SwaggerGeneratorBase {
             .call([literalString(parameter.name.replaceAll('\$', ''))]);
       default:
         if (parameter.inParameter == _options.requestBodyName)
-          return refer(_options.requestBodyName.pascalCase).call([]);
+          return refer(kBody.pascalCase).call([]);
         else
           //https://github.com/lejard-h/chopper/issues/295
           return refer(parameter.inParameter.pascalCase)
@@ -932,7 +932,7 @@ class SwaggerRequestsGenerator extends SwaggerGeneratorBase {
               ..type = Reference(options.urlencodedFileType)
               ..named = true
               ..annotations.add(
-                refer(_options.requestBodyName.pascalCase).call([]),
+                refer(kBody.pascalCase).call([]),
               ),
           ),
         );
@@ -1002,7 +1002,7 @@ class SwaggerRequestsGenerator extends SwaggerGeneratorBase {
             )
             ..named = true
             ..annotations.add(
-              refer(_options.requestBodyName.pascalCase).call([]),
+              refer(kBody.pascalCase).call([]),
             ),
         ),
       );
